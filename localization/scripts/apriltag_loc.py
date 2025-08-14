@@ -297,14 +297,14 @@ def YOLO_detection(input):
     t_ic = T_ic[:3,3]
 
     # TODO: Delete hard code
-    translation[-1] = translation[-1]-7
-    theta = np.radians(-46)
-    Rz = np.array([
-        [np.cos(theta), -np.sin(theta), 0],
-        [np.sin(theta),  np.cos(theta), 0],
-        [0,              0,             1]
-    ])
-    R_wi = Rz @ R_wi
+#    translation[-1] = translation[-1]-7
+#    theta = np.radians(-46)
+#    Rz = np.array([
+#        [np.cos(theta), -np.sin(theta), 0],
+#        [np.sin(theta),  np.cos(theta), 0],
+#        [0,              0,             1]
+#    ])
+#    R_wi = Rz @ R_wi
 
     result = model.predict(frame, verbose=False, conf=0.65)[0]
     coords = []
