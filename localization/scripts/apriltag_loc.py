@@ -21,10 +21,10 @@ from camera import Camera
 import numpy as np
 
 # TODO: Modify this paths when running on drone
-ckpt = '/home/rex/data/catkin_ws/src/my_bag_tools/scripts/11x_ft.pt'
-camera_cfg = '/home/rex/Downloads/data_07_02_2025/camchain.yaml'
+ckpt = '/ws/src/11x_ft.pt'
+camera_cfg = '/ws/src/localization/scripts/camchain.yaml'
 
-SAVE_RESULT = True # Save result for debugging
+SAVE_RESULT = False # Save result for debugging
 save_path = '/home/rex/data/catkin_ws/src/my_bag_tools/scripts/result.txt'
 save_crops = '/home/rex/data/catkin_ws/src/my_bag_tools/scripts/crops.npz'
 save_path2 = '/home/rex/data/catkin_ws/src/my_bag_tools/scripts/result_cluster.txt'
