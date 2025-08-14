@@ -17,8 +17,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 add_message_files(
   FILES
-  CasualtyFix.msg
-  CasualtyFixArray.msg
+  dtc_msgs/CasualtyFix.msg
+  dtc_msgs/CasualtyFixArray.msg
 )
 
 generate_messages(
