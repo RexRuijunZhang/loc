@@ -1,6 +1,6 @@
 <launch>
     <!-- Node to run Apriltag localization script -->
-    <node pkg="localization"          <!-- Replace with your package name -->
+    <node pkg="localization"
           type="apriltag_loc.py"
           name="apriltag_localization"
           output="screen">
