@@ -274,7 +274,7 @@ class Localization:
             msg.image = img_msg
 
             msg.location = NavSatFix()
-            lon, lat = self.proj_ll(obj['center'][0], -obj['center'][1])
+            lon, lat = self.proj_ll.transform(obj['center'][0], -obj['center'][1])
             msg.location.latitude = lat
             msg.location.longitude = lon
             msg.location.altitude = 0
