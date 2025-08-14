@@ -2,7 +2,7 @@
 
 import rospy
 from cv_bridge import CvBridge
-from target_localization.dtc_msgs import CasualtyFix, CasualtyFixArray
+from target_localization.msgs.dtc_msgs import CasualtyFix, CasualtyFixArray
 from std_msgs.msg import Header, Time
 from sensor_msgs.msg import NavSatFix, Imu, MagneticField,  CompressedImage, Image
 from std_msgs.msg import Float64, Float32MultiArray
