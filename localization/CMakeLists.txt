@@ -13,22 +13,13 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  dtc_msgs
   message_generation
 )
-add_message_files(
-  FILES
-  dtc_msgs/CasualtyFix.msg
-  dtc_msgs/CasualtyFixArray.msg
-)
 
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  sensor_msgs
-)
 
 catkin_package(
-  CATKIN_DEPENDS message_runtime std_msgs sensor_msgs
+  CATKIN_DEPENDS message_runtime std_msgs sensor_msgs dtc_msgs
 )
 
 ## System dependencies are found with CMake's conventions

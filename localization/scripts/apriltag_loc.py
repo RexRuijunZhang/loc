@@ -2,7 +2,7 @@
 
 import rospy
 from cv_bridge import CvBridge
-from target_localization.msg.dtc_msgs import CasualtyFix, CasualtyFixArray
+from dtc_msgs.msg import CasualtyFix, CasualtyFixArray
 from std_msgs.msg import Header, Time
 from sensor_msgs.msg import NavSatFix, Imu, MagneticField,  CompressedImage, Image
 from std_msgs.msg import Float64, Float32MultiArray
@@ -38,7 +38,7 @@ detection_raw = []
 result_lock = Lock()
 
 def box_center(
-        boxes: Boxes, 
+        boxes: Boxes,
         center: bool = True
 ) -> np.ndarray:
     """Get the center of the bounding boxes.
@@ -120,7 +120,7 @@ class Localization:
         self.pub = rospy.Publisher('/casualty_info', CasualtyFixArray, queue_size=10)
 
         # self.loc_pub = rospy.Publisher('/loc/locations', Float32MultiArray, queue_size=10)
-        self.crop_pub = rospy.Publisher('/loc/crops', Image, queue_size=10)
+        # self.crop_pub = rospy.Publisher('/loc/crops', Image, queue_size=10)
 
         rospy.Subscriber('/mavros/global_position/raw/fix', NavSatFix, self.gps_callback)
         rospy.Subscriber('/mavros/global_position/rel_alt', Float64, self.alt_callback)
@@ -251,8 +251,8 @@ class Localization:
         stitched_image = [obj['image'] for obj in self.result.objects]
         stitched_image = np.concatenate(stitched_image, axis=1)
         # print(stitched_image.shape)
-        img_msg = self.bridge.cv2_to_imgmsg(stitched_image, encoding='bgr8')
-        self.crop_pub.publish(img_msg)
+        img_msg = self.bridge.cv2_to_imgmsg(stitched_image, encoding='rgb8')
+        # self.crop_pub.publish(img_msg)
 
         # points = np.array([obj['center'] for obj in self.result.objects])
 
@@ -271,6 +271,7 @@ class Localization:
             msg.header.frame_id = "world"
 
             msg.casualty_id = obj['id']
+            msg.image = img_msg
 
             msg.location = NavSatFix()
             lon, lat = self.proj_ll(obj['center'][0], -obj['center'][1])
@@ -332,7 +333,7 @@ def YOLO_detection(input):
         translation = translation + R_wi @ t_ic
         s = -(translation[2] / ray_world[2])
         
-        world_coord = translation + s * ray_world 
+        world_coord = translation + s * ray_world
 
         print(f"World Coord: {[world_coord[0], world_coord[1], world_coord[2]]}")
         coords.append(world_coord[:2].tolist())
