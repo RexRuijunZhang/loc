@@ -112,21 +112,19 @@ class LocalizationResult:
 class Localization:
     def __init__(self):
         rospy.init_node('robot_localization')
-        self.proj_utm = Proj(proj='utm', zone=33, ellps='WGS84')
-        self.proj_wgs84 = Proj(proj='latlong', datum='WGS84')
-        self.proj_ll = Transformer.from_proj(self.proj_utm, self.proj_wgs84)
+        
         self.result = LocalizationResult()
 
-        self.pub = rospy.Publisher('/casualty_info', CasualtyFixArray, queue_size=10)
+        self.transformer = Transformer.from_crs("epsg:4326", "epsg:32610", always_xy=True)
+        self.inv_tranformer = Transformer.from_crs("epsg:32610", "epsg:4326", always_xy=True)
 
-        # self.loc_pub = rospy.Publisher('/loc/locations', Float32MultiArray, queue_size=10)
-        # self.crop_pub = rospy.Publisher('/loc/crops', Image, queue_size=10)
+        self.loc_pub = rospy.Publisher('/loc/locations', Float32MultiArray, queue_size=10)
+        self.crop_pub = rospy.Publisher('/loc/crops', Image, queue_size=10)
 
         rospy.Subscriber('/mavros/global_position/raw/fix', NavSatFix, self.gps_callback)
         rospy.Subscriber('/mavros/global_position/rel_alt', Float64, self.alt_callback)
         rospy.Subscriber('/mavros/global_position/global', NavSatFix, self.abs_alt_callback)
-        rospy.Subscriber('/imu/imu', Imu, self.imu_callback)
-        rospy.Subscriber('/imu/magnetic_field', MagneticField, self.mag_callback)
+        rospy.Subscriber('/imu/data', Imu, self.imu_callback)
         rospy.Subscriber('/camera/image_color/compressed', CompressedImage, self.frame_callback, queue_size=1)
         self.init_param()
         self.bridge = CvBridge()
@@ -143,6 +141,13 @@ class Localization:
 
     def save_result(self):
         self.result.save_objects()
+
+    def pose_callback(self,msg):
+        self.imu_time = msg.header.stamp.to_sec()
+        q = msg.pose.orientation
+        # Quaternion to Euler (roll, pitch, yaw)
+        self.rtm = quaternion_matrix([q.x, q.y, q.z, q.w])[:3,:3]
+        #self.roll, self.pitch, self.yaw = euler_from_quaternion([q.x, q.y, q.z, q.w])
 
     def init_param(self):
         self.x = None
@@ -209,11 +214,11 @@ class Localization:
 
     def gps_callback(self, msg):
         self.gps_time = msg.header.stamp.to_sec()
-        x_gps, y_gps = self.proj_utm(msg.longitude, msg.latitude)
+        x_gps, y_gps = self.transformer.transform(msg.longitude, msg.latitude)
         z_gps = self.rel_alt  # EKF still uses rel_alt for Z
 
-        self.x = x_gps # - T_world[0]
-        self.y = -y_gps #- T_world[1]
+        self.x = y_gps # - T_world[0]
+        self.y = x_gps #- T_world[1]
         if z_gps is not None:
             self.z = -z_gps #- T_world[2]
 
@@ -236,15 +241,6 @@ class Localization:
 
         self.roll, self.pitch, self.yaw = euler_from_quaternion(q_orig)
         self.rtm = quaternion_matrix(q_orig)[:3,:3]
-
-        # TODO: Add global rotation calculation after fixing imu
-        # if self.mx is not None:
-
-            # Compensate for roll and pitch on magnetometer
-            # mag_x_comp = self.mx * cos_p + self.mz * sin_p
-            # mag_y_comp = self.mx * sin_r * sin_p + self.my * cos_r - self.mz * sin_r * cos_p
-
-            # B_world = rtm @ np.array([self.mx, self.my, self.mz])
     def publish_pose(self):
         if len(self.result.objects)<1:
             return
@@ -274,7 +270,7 @@ class Localization:
             msg.image = img_msg
 
             msg.location = NavSatFix()
-            lon, lat = self.proj_ll.transform(obj['center'][0], -obj['center'][1])
+            lon, lat = self.inv_tranformer.transform(obj['center'][1], obj['center'][0])
             msg.location.latitude = lat
             msg.location.longitude = lon
             msg.location.altitude = 0
