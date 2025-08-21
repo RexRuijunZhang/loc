@@ -25,6 +25,7 @@ ckpt = '/ws/src/11x_ft.pt'
 camera_cfg = '/ws/src/localization/scripts/camchain.yaml'
 
 SAVE_RESULT = False # Save result for debugging
+traj_save_path = '/home/rex/data/catkin_ws/src/my_bag_tools/scripts/traj.txt'
 save_path = '/home/rex/data/catkin_ws/src/my_bag_tools/scripts/result.txt'
 save_crops = '/home/rex/data/catkin_ws/src/my_bag_tools/scripts/crops.npz'
 save_path2 = '/home/rex/data/catkin_ws/src/my_bag_tools/scripts/result_cluster.txt'
@@ -359,8 +360,10 @@ def read_all_casualty_coords(directory):
 
 def save_results_on_exit():
     global detection_raw
+    global traj_raw
     if len(detection_raw)>=1:
         np.savetxt(save_path, np.array(detection_raw))
+    np.savetxt(traj_save_path, np.array(traj_raw))
 
 
 if __name__ == '__main__':
