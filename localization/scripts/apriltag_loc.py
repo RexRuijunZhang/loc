@@ -119,9 +119,10 @@ class Localization:
 
         self.transformer = Transformer.from_crs("epsg:4326", "epsg:32610", always_xy=True)
         self.inv_tranformer = Transformer.from_crs("epsg:32610", "epsg:4326", always_xy=True)
+        self.pub = rospy.Publisher('/casualty_info', CasualtyFixArray, queue_size=10)
 
-        self.loc_pub = rospy.Publisher('/loc/locations', Float32MultiArray, queue_size=10)
-        self.crop_pub = rospy.Publisher('/loc/crops', Image, queue_size=10)
+        # self.loc_pub = rospy.Publisher('/loc/locations', Float32MultiArray, queue_size=10)
+        # self.crop_pub = rospy.Publisher('/loc/crops', Image, queue_size=10)
 
         rospy.Subscriber('/mavros/global_position/raw/fix', NavSatFix, self.gps_callback)
         rospy.Subscriber('/mavros/global_position/rel_alt', Float64, self.alt_callback)
