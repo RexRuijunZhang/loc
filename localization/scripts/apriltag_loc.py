@@ -36,6 +36,7 @@ model.to('cuda')
 last_result = []
 last_crops = []
 detection_raw = []
+traj_raw = []
 result_lock = Lock()
 
 def box_center(
@@ -292,6 +293,9 @@ def YOLO_detection(input):
     cam = input['cam']
     R_ic = T_ic[:3,:3]
     t_ic = T_ic[:3,3]
+    
+    global traj_raw
+    traj_raw.append(translation[:2])
 
     # TODO: Delete hard code
 #    translation[-1] = translation[-1]-7
