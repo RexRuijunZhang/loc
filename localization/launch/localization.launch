@@ -1,0 +1,10 @@
+<launch>
+    <!-- Node to run Apriltag localization script -->
+    <node pkg="localization"
+          type="apriltag_loc.py"
+          name="apriltag_localization"
+          output="screen">
+        <!-- Optional: remap topics if needed -->
+        <!-- <remap from="input_topic" to="/camera/image_raw"/> -->
+    </node>
+</launch>
