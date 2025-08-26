@@ -157,7 +157,9 @@ class DetectionVisualizer:
       if GT:
         all_lats = [item[0] for item in self.casualty_gps]
         all_lons = [item[1] for item in self.casualty_gps]
-
+      else:
+        all_lats = []
+        all_lons = []
       # Plot drone trajectory
       if self.drone_trajectory:
           drone_lats = [d[0] for d in self.drone_trajectory]
