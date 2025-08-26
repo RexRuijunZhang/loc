@@ -239,7 +239,6 @@ class Localization:
             point = Point(lat, lon)
             if not self.geofence.contains(point):
                 print('Object',cluster_id,' Not in geofence')
-                continue
             cf.location = NavSatFix()
             cf.location.latitude  = lat
             cf.location.longitude = lon
