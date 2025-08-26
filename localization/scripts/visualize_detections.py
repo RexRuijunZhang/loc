@@ -19,6 +19,8 @@ from sensor_msgs.msg import NavSatFix
 
 from loguru import logger
 
+GT = False
+
 # import sys
 # sys.path.insert(0, "/home/darpa/ros_ws2/src/localization/scripts")
 
@@ -78,10 +80,11 @@ class DetectionVisualizer:
 
       logger.info("DetectionVisualizer started. Listening to /loc/locations and drone GPS...")
       logger.info("Close the plot window to stop.")
-
-      directory_path = '/home/rex/Downloads/gt'
-      self.casualty_gps = np.array(read_all_casualty_coords(directory_path))
-      self.ax1.scatter(self.casualty_gps[:,1], self.casualty_gps[:,0], color = 'r')
+      
+      if GT:
+        directory_path = '/home/rex/Downloads/gt'
+        self.casualty_gps = np.array(read_all_casualty_coords(directory_path))
+        self.ax1.scatter(self.casualty_gps[:,1], self.casualty_gps[:,0], color = 'r')
 
       
 
@@ -151,9 +154,9 @@ class DetectionVisualizer:
       self.ax1.set_xlabel('Longitude')
       self.ax1.set_ylabel('Latitude')
       self.ax1.grid(True, alpha=0.3)
-
-      all_lats = [item[0] for item in self.casualty_gps]
-      all_lons = [item[1] for item in self.casualty_gps]
+      if GT:
+        all_lats = [item[0] for item in self.casualty_gps]
+        all_lons = [item[1] for item in self.casualty_gps]
 
       # Plot drone trajectory
       if self.drone_trajectory:
@@ -228,7 +231,8 @@ class DetectionVisualizer:
 
           self.ax1.set_xlim(min(all_lons) - padding, max(all_lons) + padding)
           self.ax1.set_ylim(min(all_lats) - padding, max(all_lats) + padding)
-      self.ax1.scatter(self.casualty_gps[:,1], self.casualty_gps[:,0], color = 'r')
+      if GT:
+         self.ax1.scatter(self.casualty_gps[:,1], self.casualty_gps[:,0], color = 'r')
       # Add legend
       self.ax1.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 
