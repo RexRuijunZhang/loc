@@ -112,7 +112,8 @@ class Camera:
     
     def reproject(
             self, 
-            pixel_coords: Union[np.ndarray, List]
+            pixel_coords: Union[np.ndarray, List],
+            fix_distortion: bool = True
     ):
         """
         Reproject from image pixel frame to normalized camera frame.
@@ -125,13 +126,11 @@ class Camera:
         pixel_coords = np.array(pixel_coords)
         assert pixel_coords.ndim == 2 and pixel_coords.shape[1] == 2, f"Input must be of shape (N, 2), but got {pixel_coords.shape}"
 
-        if self.dist_coef is not None:
+        if self.dist_coef is not None and fix_distortion:
             # undistort when given the distortion coefficients
-            
             pixel_coords = pixel_coords.reshape(-1, 1, 2).astype(np.float32)
             undistorted = cv2.undistortPoints(pixel_coords, self.K, self.dist_coef)
             rays = np.concatenate([undistorted[:, 0], np.ones((len(undistorted), 1))], axis=1)
-            
         else:
             # pinhole model
             x = (pixel_coords[:, 0] - self.cx) / self.fx
