@@ -15,6 +15,7 @@ from pyproj import Proj, Transformer
 from tf.transformations import (
     euler_from_quaternion, quaternion_from_euler, quaternion_matrix
 )
+from shapely.geometry import Point, Polygon
 
 from detector import PersonDetector
 from utils.converter import LLtoUTM, UTMtoLL
@@ -22,9 +23,9 @@ from utils.converter import LLtoUTM, UTMtoLL
 import numpy as np
 
 # TODO: Modify this paths when running on drone
-ckpt = '/home/rex/data/catkin_ws/src/localization/scripts/checkpoints/11x_ft.pt'
-camera_cfg = '/home/rex/data/catkin_ws/src/localization/scripts/camchain.yaml'
-
+ckpt = '/ws/src/11x_ft.pt'
+camera_cfg = '/ws/src/localization/scripts/camchain.yaml'
+geofence_txt = '/ws/src/geofence.txt'
 
 SAVE_RESULT = False # Save result for debugging
 save_path = '/home/rex/data/catkin_ws/src/my_bag_tools/scripts/result.txt'
@@ -55,6 +56,10 @@ class Localization:
             device='cuda',
             min_points_threshold=10
         )
+        geofence = np.loadtxt(geofence_txt)
+        geofence = geofence.reshape(-1,2)
+        vertices = [(geo[0], geo[1]) for geo in geofence]
+        self.geofence = Polygon(vertices)
 
         self.transformer = Transformer.from_crs("epsg:4326", "epsg:32610", always_xy=True)
         self.inv_transformer = Transformer.from_crs("epsg:32610", "epsg:4326", always_xy=True)
@@ -230,6 +235,11 @@ class Localization:
             E = float(info['centroid'][1])
             lon, lat = self.inv_transformer.transform(E, N)   # returns (lon, lat)
 
+
+            point = Point(lat, lon)
+            if not self.geofence.contains(point):
+                print('Object',cluster_id,' Not in geofence')
+                continue
             cf.location = NavSatFix()
             cf.location.latitude  = lat
             cf.location.longitude = lon

@@ -9,6 +9,7 @@ from utils.calibration import UAVCalibration
 from typing import List, Optional, Tuple
 from collections import defaultdict
 import cv2
+from shapely.geometry import Point, Polygon
 
 
 
@@ -52,9 +53,11 @@ class Clusterer:
             dict: Dictionary of valid clusters with their points
         """
         valid_clusters = {}
+
         for cluster_id, points in self.clusters.items():
             if len(points) >= self.min_points_threshold:
                 valid_clusters[cluster_id] = points
+
         return valid_clusters
 
 
