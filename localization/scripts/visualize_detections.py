@@ -263,8 +263,8 @@ class DetectionVisualizer:
               if i >= rows * cols:
                   break
                   
-              row = cluster_id // cols
-              col = cluster_id % cols
+              row = i // cols
+              col = i % cols
               
               # Fix image processing
               try:

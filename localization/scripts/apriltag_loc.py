@@ -23,9 +23,13 @@ from utils.converter import LLtoUTM, UTMtoLL
 import numpy as np
 
 # TODO: Modify this paths when running on drone
-ckpt = '/ws/src/11x_ft.pt'
+ckpt = '/ws/src/epoch20.pt'
 camera_cfg = '/ws/src/localization/scripts/camchain.yaml'
 geofence_txt = '/ws/src/geofence.txt'
+
+# ckpt = '/home/rex/data/catkin_ws/src/epoch20.pt'
+# camera_cfg = '/home/rex/data/catkin_ws/src/localization/scripts/camchain.yaml'
+# geofence_txt = '/home/rex/data/catkin_ws/src/geofence.txt'
 
 SAVE_RESULT = False # Save result for debugging
 save_path = '/home/rex/data/catkin_ws/src/my_bag_tools/scripts/result.txt'
@@ -40,6 +44,23 @@ class _Adapter:
         return self._f(*args, **kwargs)
     __call__ = transform
 
+def apply_clahe(img, clip_limit=2.0, tile_grid_size=(8, 8)):
+    # Read image (supports both grayscale and 16-bit thermal images)
+    
+    if img is None:
+        raise FileNotFoundError(f"Image not found")
+
+    # Normalize 16-bit thermal image to 8-bit if needed
+    if img.dtype != np.uint8:
+        img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX)
+        img = img.astype(np.uint8)
+
+    # Apply CLAHE
+    clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
+    img_clahe = clahe.apply(img)
+    return img_clahe
+
+
 
 class Localization:
     def __init__(self):
@@ -50,7 +71,7 @@ class Localization:
         self.detector = PersonDetector(
             model_path=ckpt,
             camera_config = camera_cfg,
-            confidence_threshold=0.65,
+            confidence_threshold=0.4,
             distance_threshold=2.5,
             clustering_method='centroid',
             device='cuda',
@@ -71,13 +92,13 @@ class Localization:
         rospy.Subscriber('/mavros/global_position/rel_alt', Float64, self.alt_callback)
         rospy.Subscriber('/mavros/global_position/global', NavSatFix, self.abs_alt_callback)
         rospy.Subscriber('/imu/data', Imu, self.imu_callback)
-        rospy.Subscriber('/camera/image_color/compressed', CompressedImage, self.frame_callback, queue_size=1)
+        rospy.Subscriber('/boson/image_raw', Image, self.frame_callback, queue_size=1)
         self.init_param()
         self.bridge = CvBridge()
 
         #TODO: Load calibration from file
         T_ci =  np.array([
-            [0.011106298412152327,  0.9999324199187616,   0.0034359468839849595,  0.036802732375442404],
+            [0.011106298412152327,  0.9999324199187616,   0.0034359468839849595,  -0.040802732375442404],
             [-0.999832733821092,    0.01115499451474039,  -0.014493808237225339, -0.008332238900780303],
             [-0.014531156713131006, -0.0032743996068676073, 0.9998890557415823,  -0.08775357009176091],
             [0.0,                   0.0,                   0.0,                   1.0]
@@ -134,12 +155,20 @@ class Localization:
         if self.processing:
             return  # Skip frame if still processing previous
         
+        filter_min = 28000
+        filter_max = 38000
+        
         if self.x is None or self.y is None or self.z is None or self.rtm is None :
             return
         self.processing = True
         self.frame_time = msg.header.stamp.to_sec()
-        img_np = np.frombuffer(msg.data, np.uint8)
-        self.image = cv2.imdecode(img_np, cv2.IMREAD_COLOR)
+        img_np = np.frombuffer(msg.data, np.int32)
+        self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='mono16')
+        self.image = np.clip(self.image, filter_min, filter_max)
+        self.image = apply_clahe(self.image)
+        self.image = self.image[...,None]
+
+        self.image = np.repeat(self.image, 3, axis=-1)  
         detect_input = {
             'image':self.image,
             'translation':np.array([self.x, self.y, self.z]),
