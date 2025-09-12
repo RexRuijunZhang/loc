@@ -139,6 +139,8 @@ class PersonDetector:
         
         # for each detection
         for box in result.boxes:
+            if np.abs(translation[-1]) < 4.5:
+                break
             xyxy = box.xyxy[0].cpu().numpy().astype(int)
             pixel_coord = box_center(box, center=False)
             confidence = box.conf.item()
