@@ -66,6 +66,7 @@ class Localization:
         
         # self.result = LocalizationResult()
         rospy.loginfo(f"Initializing PersonDetector with {ckpt}")
+        rospy.loginfo(f"Run mode set to {run_mode}")
         self.detector = PersonDetector(
             model_path=ckpt,
             camera_config = camera_cfg,
