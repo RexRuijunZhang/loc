@@ -23,7 +23,11 @@ from utils.converter import LLtoUTM, UTMtoLL
 import numpy as np
 
 # TODO: Modify this paths when running on drone
-ckpt = '/ws/src/11x_ft.pt'
+ckpt = ''
+run_mode = ''
+# ckpt = '/ws/src/11x_ft.pt'
+
+# ckpt = '/ws/src/epoch20.pt'
 camera_cfg = '/ws/src/localization/scripts/camchain.yaml'
 geofence_txt = '/ws/src/geofence.txt'
 
@@ -40,6 +44,21 @@ class _Adapter:
         return self._f(*args, **kwargs)
     __call__ = transform
 
+def apply_clahe(img, clip_limit=2.0, tile_grid_size=(8, 8)):
+    # Read image (supports both grayscale and 16-bit thermal images)
+    
+    if img is None:
+        raise FileNotFoundError(f"Image not found")
+
+    # Normalize 16-bit thermal image to 8-bit if needed
+    if img.dtype != np.uint8:
+        img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX)
+        img = img.astype(np.uint8)
+
+    # Apply CLAHE
+    clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
+    img_clahe = clahe.apply(img)
+    return img_clahe
 
 class Localization:
     def __init__(self):
@@ -297,8 +316,17 @@ def save_results_on_exit():
 if __name__ == '__main__':
     try:
         detect = Localization()
+        run_mode = rospy.get_param("~mode", 'day')  # "~" means private parameter
+        if run_mode == 'day':
+            ckpt = '/ws/src/11x_ft.pt'
+        elif run_mode == 'night':
+            ckpt = '/ws/src/epoch20.pt'
+        else:
+            rospy.loginfo("Run mode not implemented: ", run_mode)
+            raise NameError
+            
+        rospy.loginfo("Run mode is set to: %s", run_mode)
         if SAVE_RESULT:
-
             rospy.on_shutdown(save_results_on_exit)
         rospy.spin()
     except rospy.ROSInterruptException:
