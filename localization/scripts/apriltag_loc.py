@@ -343,10 +343,10 @@ if __name__ == '__main__':
         elif run_mode == 'night':
             ckpt = '/ws/src/epoch20.pt'
         else:
-            rospy.loginfo("Run mode not implemented: ", run_mode)
+            rospy.loginfo(f"Run mode not implemented: {run_mode}")
             raise NameError
             
-        rospy.loginfo("Run mode is set to: %s", run_mode)
+        rospy.loginfo(f"Run mode set to: {run_mode}")
         if SAVE_RESULT:
             rospy.on_shutdown(save_results_on_exit)
         rospy.spin()
