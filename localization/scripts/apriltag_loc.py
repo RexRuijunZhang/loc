@@ -62,7 +62,7 @@ def apply_clahe(img, clip_limit=2.0, tile_grid_size=(8, 8)):
 
 class Localization:
     def __init__(self):
-        rospy.init_node('robot_localization')
+        # rospy.init_node('robot_localization')
         
         # self.result = LocalizationResult()
         rospy.loginfo(f"Initializing PersonDetector with {ckpt}")
