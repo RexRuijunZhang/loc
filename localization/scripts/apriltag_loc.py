@@ -23,8 +23,8 @@ from utils.converter import LLtoUTM, UTMtoLL
 import numpy as np
 
 # TODO: Modify this paths when running on drone
-ckpt = ''
-run_mode = ''
+ckpt = 'default'
+run_mode = 'default'
 # ckpt = '/ws/src/11x_ft.pt'
 
 # ckpt = '/ws/src/epoch20.pt'
