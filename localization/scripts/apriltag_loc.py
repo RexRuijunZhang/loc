@@ -153,12 +153,25 @@ class Localization:
         if self.processing:
             return  # Skip frame if still processing previous
         
+        
+        
         if self.x is None or self.y is None or self.z is None or self.rtm is None :
             return
         self.processing = True
         self.frame_time = msg.header.stamp.to_sec()
         img_np = np.frombuffer(msg.data, np.uint8)
-        self.image = cv2.imdecode(img_np, cv2.IMREAD_COLOR)
+        
+        if run_mode == 'night':
+            filter_min = 28000
+            filter_max = 38000
+            self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='mono16')
+            self.image = np.clip(self.image, filter_min, filter_max)
+            self.image = apply_clahe(self.image)
+            self.image = self.image[...,None]
+
+            self.image = np.repeat(self.image, 3, axis=-1)  
+        else:
+            self.image = cv2.imdecode(img_np, cv2.IMREAD_COLOR)
         detect_input = {
             'image':self.image,
             'translation':np.array([self.x, self.y, self.z]),
