@@ -65,7 +65,7 @@ class Localization:
         rospy.init_node('robot_localization')
         
         # self.result = LocalizationResult()
-        rospy.loginfo("Initializing PersonDetector...")
+        rospy.loginfo(f"Initializing PersonDetector with {ckpt}")
         self.detector = PersonDetector(
             model_path=ckpt,
             camera_config = camera_cfg,
