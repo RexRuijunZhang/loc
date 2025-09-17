@@ -340,6 +340,7 @@ if __name__ == '__main__':
         rospy.init_node("apriltag_localization")
         detect = Localization()
         run_mode = rospy.get_param("/mode", 'day')  # "~" means private parameter
+        rospy.loginfo("Run mode %sf", run_mode)
         if run_mode == 'day':
             ckpt = '/ws/src/11x_ft.pt'
         elif run_mode == 'night':
