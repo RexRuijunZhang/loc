@@ -70,6 +70,7 @@ class Localization:
             model_path=ckpt,
             camera_config = camera_cfg,
             confidence_threshold=0.65,
+            run_mode=run_mode,
             distance_threshold=2.5,
             clustering_method='centroid',
             device='cuda',
@@ -84,7 +85,7 @@ class Localization:
         self.inv_transformer = Transformer.from_crs("epsg:32610", "epsg:4326", always_xy=True)
         # self.init_geo_tools()
 
-        self.pub_locations = rospy.Publisher('/loc/locations', CasualtyFixArray, queue_size=10)
+        self.pub_locations = rospy.Publisher('/casualty_info', CasualtyFixArray, queue_size=10)
 
         rospy.Subscriber('/mavros/global_position/raw/fix', NavSatFix, self.gps_callback)
         rospy.Subscriber('/mavros/global_position/rel_alt', Float64, self.alt_callback)

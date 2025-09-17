@@ -29,6 +29,7 @@ class PersonDetector:
         self,
         model_path: str = 'checkpoints/11x_ft.pt',
         camera_config: str = 'camchain.yaml',
+        run_mode = '',
         confidence_threshold: float = 0.67,
         distance_threshold: float = 2.5,
         clustering_method: str = 'centroid',
@@ -57,7 +58,10 @@ class PersonDetector:
         self.confidence_threshold = confidence_threshold
         
         # Load camera and calibration
-        self.cam = Camera.load_config(camera_config)
+        cam_name = 'cam0'
+        if run_mode == 'night':
+            cam_name = 'cam1'
+        self.cam = Camera.load_config(camera_config, cam_name)
         self.calib = UAVCalibration()
         
         # Initialize tracker for localization

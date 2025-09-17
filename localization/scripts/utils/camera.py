@@ -41,7 +41,7 @@ class Camera:
 
     @staticmethod
     def load_config(
-        path: str = "camchain.yaml"
+        path: str = "camchain.yaml", name = 'cam0'
     ) -> Camera:
         # from https://stackoverflow.com/questions/30458977/yaml-loads-5e-6-as-string-and-not-a-number
         loader = yaml.SafeLoader
@@ -63,7 +63,7 @@ class Camera:
         with open(path, "r") as f:
             cfg = yaml.load(f, Loader=loader)
 
-        cam = cfg['cam0']
+        cam = cfg[name]
         fx, fy, cx, cy = cam['intrinsics']
         distortion_coef = np.array(cam['distortion_coeffs'])
         distortion_model = cam['distortion_model']

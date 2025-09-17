@@ -72,8 +72,8 @@ class DetectionVisualizer:
       self.ax2.axis('off')
 
       # Subscribe to topics
-      rospy.Subscriber('/loc/locations', CasualtyFixArray, self.detection_callback)
-      rospy.Subscriber('/mavros/global_position/raw/fix', NavSatFix, self.drone_gps_callback)
+      rospy.Subscriber('/dione/casualty_info', CasualtyFixArray, self.detection_callback)
+      rospy.Subscriber('/dione/mavros/global_position/raw/fix', NavSatFix, self.drone_gps_callback)
 
       # Animation
       self.ani = animation.FuncAnimation(self.fig, self.update_plot, interval=1000, blit=False)
