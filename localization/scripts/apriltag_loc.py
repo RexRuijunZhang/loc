@@ -338,7 +338,7 @@ def save_results_on_exit():
 if __name__ == '__main__':
     try:
         detect = Localization()
-        run_mode = rospy.get_param("~mode", 'day')  # "~" means private parameter
+        run_mode = rospy.get_param("/mode", 'day')  # "~" means private parameter
         if run_mode == 'day':
             ckpt = '/ws/src/11x_ft.pt'
         elif run_mode == 'night':
